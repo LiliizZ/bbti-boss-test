@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BBTI 老板人格鉴定</title>
+  <style>
+    :root {
+      --bg: #f5f4fa;
+      --panel: #ffffff;
+      --text: #1a1e2e;
+      --muted: #6b7084;
+      --line: #dde0ea;
+      --soft: #f0eef8;
+      --accent: #7c3aed;
+      --accent-strong: #6d28d9;
+      --danger: #dc2626;
+      --shadow: 0 16px 40px rgba(109, 40, 217, 0.10);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top left, #ede9ff 0, #f5f4fa 40%, #fdf2f2 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .shell { max-width: 980px; margin: 0 auto; padding: 24px 16px 56px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .hero { padding: 32px; margin-top: 20px; position: relative; overflow: hidden; }
+    .hero::after {
+      content: "";
+      position: absolute; right: -60px; top: -60px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: linear-gradient(180deg, rgba(124,58,237,0.15), rgba(220,38,38,0.05));
+      pointer-events: none;
+    }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; color: var(--accent-strong);
+      border: 1px solid var(--line); background: var(--soft);
+      border-radius: 999px; padding: 8px 14px; margin-bottom: 18px;
+    }
+    h1, h2, h3, p { margin: 0; }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 52px);
+      line-height: 1.08; letter-spacing: -0.03em; max-width: 680px;
+    }
+    .hero .sub {
+      margin-top: 14px; color: var(--muted);
+      font-size: 15px; line-height: 1.75; max-width: 720px;
+    }
+    .hero-grid {
+      display: grid; grid-template-columns: 1.3fr 0.9fr;
+      gap: 18px; align-items: stretch; margin-top: 24px;
+    }
+    @media (max-width: 600px) { .hero-grid { grid-template-columns: 1fr; } }
+    .mini-panel {
+      padding: 18px; border-radius: 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #fbfaff, #f3f0fa);
+    }
+    .mini-panel h3 { font-size: 15px; margin-bottom: 10px; }
+    .mini-panel ul { margin: 0; padding-left: 18px; color: var(--muted); line-height: 1.8; font-size: 14px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+    button { border: 0; cursor: pointer; transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease; font: inherit; }
+    button:hover { transform: translateY(-1px); }
+    button:disabled { cursor: not-allowed; opacity: 0.55; transform: none; }
+    .btn-primary {
+      background: var(--accent-strong); color: #fff;
+      padding: 14px 24px; border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(109,40,217,0.22);
+      font-weight: 700; font-size: 15px;
+    }
+    .btn-secondary {
+      background: #fff; color: var(--accent-strong);
+      padding: 14px 24px; border-radius: 14px;
+      border: 1px solid var(--line); font-weight: 700; font-size: 15px;
+    }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .test-wrap { margin-top: 22px; padding: 22px; }
+    .topbar {
+      display: flex; justify-content: space-between;
+      align-items: center; gap: 16px; margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .progress {
+      flex: 1; min-width: 240px; height: 10px;
+      background: #ece8f8; border-radius: 999px; overflow: hidden;
+    }
+    .progress > span {
+      display: block; height: 100%;
+      background: linear-gradient(90deg, var(--accent-strong), #a855f7);
+      border-radius: 999px; transition: width .3s ease;
+    }
+    .progress-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+    .q-card { padding: 28px 28px 22px; }
+    .q-dim {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      color: var(--accent-strong); background: var(--soft);
+      border-radius: 999px; padding: 4px 12px; margin-bottom: 14px; letter-spacing: .05em;
+    }
+    .q-text { font-size: 18px; font-weight: 700; line-height: 1.55; margin-bottom: 22px; }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .opt-btn {
+      text-align: left; background: var(--soft);
+      border: 2px solid transparent; border-radius: 14px;
+      padding: 14px 18px; font-size: 14px; line-height: 1.5;
+      color: var(--text); transition: all .15s ease;
+    }
+    .opt-btn:hover { border-color: var(--accent); background: #ede9ff; transform: translateX(4px); }
+    .opt-btn.selected { border-color: var(--accent-strong); background: #ede9ff; font-weight: 600; }
+    .nav-row {
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 16px 28px 22px; gap: 12px;
+    }
+    /* Result */
+    .result-wrap { padding: 28px; }
+    .result-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, var(--accent-strong), #a855f7);
+      color: #fff; border-radius: 999px;
+      padding: 8px 20px; font-size: 12px; font-weight: 700;
+      letter-spacing: .08em; margin-bottom: 18px;
+    }
+    .result-code { font-size: clamp(40px, 8vw, 72px); font-weight: 900; letter-spacing: -.03em; line-height: 1; }
+    .result-cn { font-size: 22px; font-weight: 700; color: var(--muted); margin-top: 6px; }
+    .result-intro {
+      font-size: 18px; font-weight: 700; color: var(--accent-strong);
+      margin: 16px 0; padding: 16px 20px;
+      background: var(--soft); border-radius: 14px;
+      border-left: 4px solid var(--accent-strong);
+    }
+    .result-desc { font-size: 15px; line-height: 1.85; color: #2d2d3a; margin-bottom: 24px; }
+    .dims-title { font-size: 14px; font-weight: 700; color: var(--muted); margin-bottom: 14px; letter-spacing: .05em; }
+    .dims-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+    @media (max-width: 600px) { .dims-grid { grid-template-columns: 1fr 1fr; } }
+    .dim-item { background: var(--soft); border-radius: 12px; padding: 12px 14px; }
+    .dim-item .dim-name { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .dim-bar-bg { height: 6px; background: #ddd8f0; border-radius: 999px; overflow: hidden; }
+    .dim-bar { height: 100%; border-radius: 999px; transition: width .5s ease; }
+    .dim-bar.L { background: #f87171; width: 20%; }
+    .dim-bar.M { background: #fbbf24; width: 55%; }
+    .dim-bar.H { background: #34d399; width: 90%; }
+    .dim-score { font-size: 12px; font-weight: 700; margin-top: 5px; }
+    .dim-score.L { color: #dc2626; }
+    .dim-score.M { color: #d97706; }
+    .dim-score.H { color: #059669; }
+    .result-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+    /* hidden type */
+    .hidden-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, #dc2626, #7c3aed);
+      color: #fff; border-radius: 999px;
+      padding: 8px 20px; font-size: 12px; font-weight: 700;
+      letter-spacing: .08em; margin-bottom: 18px;
+    }
+    .result-code.hidden-type { color: #dc2626; }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <!-- 首页 -->
+  <div id="intro" class="screen active">
+    <div class="card hero">
+      <div class="eyebrow">⚠️ BBTI 老板人格鉴定 · 打工人专用</div>
+      <h1>你的老板是什么人格？</h1>
+      <p class="sub">30道题，5大模型，15个维度，20种人格。<br>帮你把老板钉在标本板上。仅供娱乐，请勿当真。</p>
+      <div class="hero-grid">
+        <div class="mini-panel">
+          <h3>🔬 五大分析模型</h3>
+          <ul>
+            <li>权力模型 — 控制欲 / 边界感 / 自我中心度</li>
+            <li>沟通模型 — 反馈风格 / 透明度 / 情绪稳定性</li>
+            <li>决策模型 — 拍板速度 / 变卦频率 / 风险偏好</li>
+            <li>画饼模型 — 饼的质量 / PUA指数 / 愿景感</li>
+            <li>人性模型 — 同理心 / 公平感 / 甩锅指数</li>
+          </ul>
+        </div>
+        <div class="mini-panel">
+          <h3>📋 关于测试</h3>
+          <ul>
+            <li>共 30 道题，约 5 分钟</li>
+            <li>20 种人格类型（含隐藏）</li>
+            <li>纯本地计算，不上传数据</li>
+            <li>仅供娱乐，请勿对号入座</li>
+          </ul>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="startTest()">开始鉴定老板 →</button>
+        <div id="counter" style="align-self:center;font-size:13px;color:var(--muted);display:none;">
+          已有 <strong id="counter-num">0</strong> 人完成测评
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 答题 -->
+  <div id="quiz" class="screen">
+    <div class="card" style="margin-top:20px;">
+      <div class="test-wrap">
+        <div class="topbar">
+          <div class="progress"><span id="progress-bar" style="width:0%"></span></div>
+          <div class="progress-label" id="progress-label">0 / 30</div>
+        </div>
+        <div id="q-container"></div>
+        <div class="nav-row">
+          <button class="btn-secondary" id="btn-prev" onclick="prevQ()" disabled>← 上一题</button>
+          <button class="btn-primary" id="btn-next" onclick="nextQ()" disabled>下一题 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 结果 -->
+  <div id="result" class="screen">
+    <div class="card" style="margin-top:20px;">
+      <div class="result-wrap" id="result-content"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 维度元数据 =====
+const DIM_META = {
+  P1: { name: 'P1 控制欲', model: '权力模型' },
+  P2: { name: 'P2 边界感', model: '权力模型' },
+  P3: { name: 'P3 自我中心度', model: '权力模型' },
+  C1: { name: 'C1 反馈风格', model: '沟通模型' },
+  C2: { name: 'C2 透明度', model: '沟通模型' },
+  C3: { name: 'C3 情绪稳定性', model: '沟通模型' },
+  D1: { name: 'D1 拍板速度', model: '决策模型' },
+  D2: { name: 'D2 变卦频率', model: '决策模型' },
+  D3: { name: 'D3 风险偏好', model: '决策模型' },
+  B1: { name: 'B1 饼的质量', model: '画饼模型' },
+  B2: { name: 'B2 PUA指数', model: '画饼模型' },
+  B3: { name: 'B3 愿景感', model: '画饼模型' },
+  H1: { name: 'H1 同理心', model: '人性模型' },
+  H2: { name: 'H2 公平感', model: '人性模型' },
+  H3: { name: 'H3 甩锅指数', model: '人性模型' },
+};
+const DIM_ORDER = ['P1','P2','P3','C1','C2','C3','D1','D2','D3','B1','B2','B3','H1','H2','H3'];
+
+// ===== 人格库 =====
+const TYPE_LIBRARY = {
+  GHOST: {
+    code: 'GHOST', cn: '幽灵老板',
+    intro: '从不出现，但绩效考核很认真。',
+    desc: '恭喜您，您测出了职场界最神秘的存在——GHOST，幽灵老板。您的老板拥有一种令人叹为观止的量子态：他同时存在于公司的组织架构图上，又完全不存在于任何实际工作场景中。组会？他"临时有事"。1on1？上次是三个月前。但到了绩效季，他突然从虚空中凝聚成形，对你的每一个细节了如指掌，精准打出3.5分。你开始怀疑他在你工位装了摄像头。幽灵老板不是不管你，他只是用一种薛定谔的方式管理着你——在你需要支持的时候消失，在你以为自由的时候出现。和幽灵老板共事的最大技能点是：学会自我管理，以及学会自我安慰。'
+  },
+  MICRO: {
+    code: 'MICRO', cn: '显微镜老板',
+    intro: '连你的字体都要管。',
+    desc: '恭喜您，您测出了全中国最令人窒息的老板人格——MICRO，显微镜老板。您的老板拥有一种神奇的能力：在你写完一封邮件之前，他已经想好了要怎么改你的每一个字。他不是在管理，他是在用放大镜审视你生命中的每一个像素。PPT字体不统一？他能发现。Excel列宽差了2个像素？他能发现。你喝咖啡的姿势不够专业？他在想要不要发一条"规范"。MICRO老板的内心深处住着一个完美主义的小恶魔，这个恶魔相信：只要管得足够细，就能控制一切结果。现实是：他管得越细，你越不想动脑子。因为反正他会改的。'
+  },
+  PAINTER: {
+    code: 'PAINTER', cn: '画饼大师',
+    intro: '期权在路上，一直在路上。',
+    desc: '恭喜您，您测出了职场界最伟大的艺术家——PAINTER，画饼大师。您的老板是一位天才画家，他的画布是你的未来，他的颜料是"年底涨薪""下轮期权""行业独角兽"。每一幅画都色彩斑斓，令人热血沸腾。唯一的问题是：这些画永远挂在墙上，从不落地。PAINTER老板有一套成熟的话术体系：当你问进展，他说"在推动了"；当你追结果，他说"大环境你懂的"；当你准备离职，他说"再等等，好事要来了"。三年后你终于明白，那个"好事"，是你自己离职找到的下家。'
+  },
+  VOLCANO: {
+    code: 'VOLCANO', cn: '火山型老板',
+    intro: '不知道什么时候爆发。',
+    desc: '恭喜您，您测出了职场界最危险的地质奇观——VOLCANO，火山型老板。和火山型老板共事，你需要一项核心技能：读空气。他今天进门时皱了一下眉？全组进入紧急避险状态。他发消息没有加句号？完了，有人要被点名了。VOLCANO老板平时可能表现得还不错，甚至有时候挺好相处——但那只是岩浆在地下积累的平静期。一旦触发某个神秘的临界点，他会以一种令所有人目瞪口呆的烈度喷发，把最近三个月的不满一次性清算。事后他可能若无其事，但你的心理阴影面积已经扩大了一个数量级。'
+  },
+  CLONE: {
+    code: 'CLONE', cn: '复制机老板',
+    intro: '要你变成他的翻版。',
+    desc: '恭喜您，您测出了职场界最执着的雕塑家——CLONE，复制机老板。CLONE老板有一个宏大的人生目标：把团队里的每一个人都塑造成他自己的复制品。他的思维方式是唯一正确的思维方式，他的工作方法是唯一有效的工作方法，他的审美是唯一的审美。你提出了一个不同的方案？"你这个思路不对，应该这样……"你用了不一样的框架？"我们一般用另一套。"久而久之，你开始怀疑自己的判断力，开始用他的口头禅，开始在会议上下意识地揣摩他会怎么想。恭喜你，你已经成功完成了第一阶段的克隆。'
+  },
+  BUDDY: {
+    code: 'BUDDY', cn: '哥们型老板',
+    intro: '称兄道弟，绩效照打。',
+    desc: '恭喜您，您测出了职场界最擅长情感套路的人格——BUDDY，哥们型老板。BUDDY老板是职场PUA的温柔版本。他跟你称兄道弟，请你吃饭，聊你的感情生活，说"咱们不是上下级，就是朋友"。你们的关系好到你以为绩效只是走个形式。然后绩效季来了，他给你打了3分，笑着说："兄弟，你懂的，公司规定，我也没办法。"你想反驳，但想起上周他还帮你出主意解决了个人问题，张不开口。这就是BUDDY老板的高明之处：用私人情感绑架职业判断，让你永远在"朋友"和"下属"的身份之间无所适从。'
+  },
+  'GHOST-WRITER': {
+    code: 'GHOST-WRITER', cn: '抢功老板',
+    intro: '你的PPT，他的汇报。',
+    desc: '恭喜您，您测出了职场界最高效的"二次创作者"——GHOST-WRITER，抢功老板。GHOST-WRITER老板拥有一项独门绝技：把你的劳动成果无缝转化为他的个人成就。你熬夜做的方案，他拿去向CEO汇报，全程用"我"；你提出的创意，在他嘴里变成了"我之前就在想"；你解决的技术难题，在他的月报里变成了"我们团队在我的带领下"。更绝的是，出了问题他绝对不在场，但摘果子的时候他永远第一个到。和GHOST-WRITER老板共事的唯一出路是：把你的贡献留下证据，不然你会在某天的全公司大会上，听到他用你的想法获得年度创新奖。'
+  },
+  ZEN: {
+    code: 'ZEN', cn: '佛系老板',
+    intro: '什么都行，什么都不管。',
+    desc: '恭喜您，您测出了职场界最超脱的存在——ZEN，佛系老板。ZEN老板已经达到了管理学的最高境界：无为而治。你问他方向，他说"你看着办"；你要资源，他说"你去协调"；你需要决策，他说"你们讨论一下"。他不是在放权，他是在放弃。ZEN老板的日常是：上午喝茶，下午开会（但不发言），傍晚准时下班。他对你的最大影响是：你需要完全靠自己。这听起来像是成长机会，但实际上是：你在用自己的判断力承担着本应由他承担的风险。如果成了，是你的本事；如果错了，是你的责任。'
+  },
+  EMPEROR: {
+    code: 'EMPEROR', cn: '皇帝型老板',
+    intro: '朕说什么就是什么。',
+    desc: '恭喜您，您测出了职场界最具封建遗风的人格——EMPEROR，皇帝型老板。EMPEROR老板活在一个平行宇宙里，那个宇宙的基本物理法则是：他说的就是对的。你拿出数据反驳？"数据可以造假。"你引用行业案例？"别的公司跟我们不一样。"你提出不同意见？"你资历还不够，等你做到我这个位置再说。"在EMPEROR的朝廷里，会议的本质是一场宣读圣旨的仪式，而不是讨论。你的职责是执行，不是思考。久而久之，团队里最聪明的人开始沉默，因为他们发现：在这里，智慧是一种负担。'
+  },
+  MENTOR: {
+    code: 'MENTOR', cn: '真导师',
+    intro: '稀有物种，珍惜。',
+    desc: '恭喜您，您测出了职场界最濒危的物种——MENTOR，真导师。MENTOR老板是一个统计学意义上的奇迹。他会在你犯错时私下告诉你哪里可以改进，而不是当众羞辱你；他会在汇报时带上你，让你有机会被看见；他说的"年底涨薪"，年底真的兑现了。和MENTOR老板共事，你会有一种奇怪的不适应感——因为你已经习惯了被管理，而不是被培养。请珍惜这段经历，把它写进简历，讲给面试官听，然后在下一家公司用MENTOR的标准衡量每一个新老板。你会发现，你已经被永久拉高了预期。'
+  },
+  PIVOT: {
+    code: 'PIVOT', cn: '变卦王',
+    intro: '方向比风向标转得还快。',
+    desc: '恭喜您，您测出了职场界最具动态美学的人格——PIVOT，变卦王。PIVOT老板相信一件事：计划永远赶不上变化，所以不如直接成为变化本身。你按照他上周的要求做完了方案，他说"我觉得方向不对，换一个"；你换了方向做完，他说"这个思路其实我之前想过，不太行"；你问他到底要什么，他说"你先做着，我们边做边看"。PIVOT老板不是故意折磨你，他只是有一种生理性的对确定性的恐惧。他的大脑永远在产生新想法，而这些想法的平均寿命是72小时。在他手下工作的最高境界是：只做60%，剩下40%等他变卦。'
+  },
+  SCAPEGOAT: {
+    code: 'SCAPEGOAT', cn: '甩锅侠',
+    intro: '锅永远是你的，功永远是他的。',
+    desc: '恭喜您，您测出了职场界最精通物理学的人格——SCAPEGOAT，甩锅侠。SCAPEGOAT老板深刻理解了牛顿第三定律在职场中的变体：每一个成功都有一个归属（他），每一个失败都有一个承担者（你）。项目失败了？"执行层面出了问题，我当时就说过要注意这个细节。"向上汇报翻车了？"是某某没做好准备，我已经提醒过他了。"你的成果被表扬了？"这是我们团队的努力，我一直在引导大家往这个方向走。"SCAPEGOAT老板的锅，有一种神奇的热传导性，永远从他身上传到你身上，而且传输过程中还会增温。'
+  },
+  STAT: {
+    code: 'STAT', cn: '数据控老板',
+    intro: '你的一切都是KPI。',
+    desc: '恭喜您，您测出了职场界最理性的存在——STAT，数据控老板。STAT老板生活在一个由数字构成的世界里。你的价值等于你的产出数据，你的成长等于你的指标曲线，你的努力等于你的打卡记录。他不是不关心你，他只是用一种Excel表格的方式关心你。1on1的时候，他会打开一个Dashboard，然后逐行分析你的"表现数据"。你说"我最近状态不太好"，他说"我看你的产出这周下降了12%，有什么原因？"。和STAT老板共事，你会学会一件事：把所有努力都量化，把所有价值都可视化。这是一种能力，但也是一种悲哀。'
+  },
+  INVISIBLE: {
+    code: 'INVISIBLE', cn: '隐形人老板',
+    intro: '要资源没资源，要反馈没反馈。',
+    desc: '恭喜您，您测出了职场界最彻底的存在主义困境——INVISIBLE，隐形人老板。INVISIBLE老板不是幽灵，幽灵至少还会在绩效季显灵。INVISIBLE老板是真正意义上的不存在：你要资源，他说"现在不好申请"；你要方向，他说"你们自己判断"；你要反馈，他说"挺好的"然后结束了1on1。在INVISIBLE老板手下，你会经历一种特殊的职场孤独：你不知道自己做得好不好，不知道公司要往哪里走，不知道你的工作对谁有价值。你就像一艘没有导航、没有补给的船，在大海上自由漂流。这是自由，也是被遗弃。'
+  },
+  TOXIC: {
+    code: 'TOXIC', cn: '毒老板',
+    intro: '以上全占，恭喜你。',
+    desc: '恭喜您，您测出了职场界的终极BOSS——TOXIC，毒老板。TOXIC老板是一个令人叹为观止的综合体：他有MICRO的控制欲，VOLCANO的情绪，SCAPEGOAT的甩锅技术，PAINTER的画饼能力，以及GHOST-WRITER的抢功本能。这不是一个人，这是一个职场噩梦的完全体。和TOXIC老板共事，你会在短时间内获得以下技能：极强的抗压能力、完善的情绪管理、精准的危机预判，以及一份充满故事的简历。每一段痛苦都是成长，每一次委屈都是阅历。但说真的——你已经可以离职了。你值得更好的。'
+  },
+  ROBOT: {
+    code: 'ROBOT', cn: '机器人老板',
+    intro: '流程就是一切，人情不存在。',
+    desc: '恭喜您，您测出了职场界最高度自动化的人格——ROBOT，机器人老板。ROBOT老板是一台完美运转的管理机器：所有事情都有流程，所有流程都必须遵守，所有例外都不存在。你妈住院了想早退？"走审批流程，需要提前三天申请。"你有个紧急想法想快速推进？"先写立项报告，过委员会评审。"你想和他聊聊职业发展？"这个话题我们下次1on1再说，今天的议程已经排满了。"ROBOT老板不坏，他只是把人类的复杂性压缩成了一套SOP。在他的世界里，效率是最高价值，而效率的敌人是情感。所以他选择了没有情感。'
+  },
+  LEECH: {
+    code: 'LEECH', cn: '吸血鬼老板',
+    intro: '你加班，他晒娃。',
+    desc: '恭喜您，您测出了职场界最擅长能量转化的人格——LEECH，吸血鬼老板。LEECH老板掌握了一种神奇的职场炼金术：把你的时间、精力和健康，转化为他的绩效、晋升和家庭幸福。你在公司加班到凌晨，他在朋友圈晒孩子的钢琴演奏会；你周末在赶方案，他在微博更新徒步打卡；你的黑眼圈越来越深，他的气色越来越好。LEECH老板不会直接命令你加班，他只会在下班前五分钟发来一个"小需求"，然后说"不急，你看着安排"。你们都知道这句话的真实含义。'
+  },
+  GOSSIP: {
+    code: 'GOSSIP', cn: '八卦老板',
+    intro: '什么都知道，什么都乱说。',
+    desc: '恭喜您，您测出了职场界最强情报官——GOSSIP，八卦老板。GOSSIP老板是公司非正式信息网络的核心节点。他知道A和B之间有矛盾，知道C在悄悄面试，知道D上个季度的真实绩效，知道CEO昨天说了什么。这些信息他都知道，而且他会在合适的时机，以"我随便说说，你别外传"的方式，精准地传递给最多的人。更妙的是，他也会把你说的话传出去。你跟他抱怨了一句同事，三天后那个同事知道了；你透露了一点职业规划，一周后HR找你谈话了。在GOSSIP老板面前，沉默是金，因为你说的每一句话都可能成为呈堂证供。'
+  },
+  SAVIOR: {
+    code: 'SAVIOR', cn: '救世主老板',
+    intro: '以拯救你为己任，其实很烦。',
+    desc: '恭喜您，您测出了职场界最令人窒息的好意——SAVIOR，救世主老板。SAVIOR老板真心实意地认为自己在帮你。他会主动帮你修改你认为已经很好的方案，因为"我有经验，我帮你优化一下"；他会替你做决定，因为"你还年轻，这种事交给我"；他会在你不需要的时候给你建议，因为"我当年就是这么走过来的"。SAVIOR老板的问题不是恶意，而是他的帮助从来不是你需要的帮助。他在拯救一个他想象中的你，而不是真实的你。长期被SAVIOR老板管理，你会逐渐失去独立判断的能力，因为他永远比你先到达答案。'
+  }
+};
+
+const NORMAL_TYPES = [
+  { code: 'GHOST',        pattern: 'LLL-LLM-MMM-LLL-LLM' },
+  { code: 'MICRO',        pattern: 'HHH-HMM-MMM-MMM-MMM' },
+  { code: 'PAINTER',      pattern: 'MMM-MMH-LMH-HHH-LML' },
+  { code: 'VOLCANO',      pattern: 'HMM-HLH-LMM-MMM-LLM' },
+  { code: 'CLONE',        pattern: 'HHM-HMM-MMM-HMM-MML' },
+  { code: 'BUDDY',        pattern: 'LML-HMM-MMM-HML-HLL' },
+  { code: 'GHOST-WRITER', pattern: 'MMH-LLM-MMM-HHH-LLH' },
+  { code: 'ZEN',          pattern: 'LLL-LHL-HLL-LLL-MMM' },
+  { code: 'EMPEROR',      pattern: 'HHH-HLH-HHH-HHH-LLL' },
+  { code: 'MENTOR',       pattern: 'LMH-HHH-MHM-MHH-HHH' },
+  { code: 'PIVOT',        pattern: 'MMM-MLM-LHM-HMH-MMM' },
+  { code: 'SCAPEGOAT',    pattern: 'HMH-LLM-HMM-LLH-LLH' },
+  { code: 'STAT',         pattern: 'HHH-MHH-HMM-HHH-LMM' },
+  { code: 'INVISIBLE',    pattern: 'LLL-LLL-LLL-LLL-LLL' },
+  { code: 'TOXIC',        pattern: 'HHH-HHH-HHH-HHH-LLL' },
+  { code: 'ROBOT',        pattern: 'HHH-MHM-HHH-MMM-LLL' },
+  { code: 'LEECH',        pattern: 'HHH-LLM-MMM-HHH-LLL' },
+  { code: 'GOSSIP',       pattern: 'MMH-HLL-MMM-MLL-LMM' },
+  { code: 'SAVIOR',       pattern: 'HHM-HHH-MMH-HMH-HLL' },
+];
+
+// 隐藏人格
+const HIDDEN_TYPE = {
+  code: 'QUIT-MAKER', cn: '劝退大师',
+  intro: '你不是在评测老板，你在描述一场灾难。',
+  desc: '恭喜您，您触发了职场界最黑暗的隐藏成就——QUIT-MAKER，劝退大师。能测出这个人格，说明你的老板已经超越了普通的"差"，进入了一种艺术级别的糟糕。QUIT-MAKER老板不需要主动赶走员工，他只需要做他自己，离职率就会自然而然地保持在行业领先水平。他的存在本身就是一道离职申请。如果你现在还在这家公司，说明你有着超乎寻常的忍耐力、强大的经济压力，或者你还没有意识到外面的世界有多好。这是一个善意的提醒：更新一下简历吧。你值得更好的。'
+};
+
+// ===== 题目 =====
+const questions = [
+  { id:'q1',  dim:'P1', text:'你发了一封邮件给老板，他的回复是？',
+    options:[{label:'回复了你的每个字，还帮你改了措辞',value:1},{label:'回复了几个字',value:2},{label:'没有回复，但你知道他看了',value:3}] },
+  { id:'q2',  dim:'P1', text:'老板对你的工作方式是？',
+    options:[{label:'每天站会+日报+周报+月报',value:1},{label:'偶尔问问进度',value:2},{label:'你爱怎么干怎么干，结果对了就行',value:3}] },
+  { id:'q3',  dim:'P2', text:'周五晚上11点，老板发来消息，内容是？',
+    options:[{label:'"现在有空吗，聊个需求"',value:1},{label:'"明天记得把那个东西跟进一下"',value:2},{label:'不会发消息，他有边界感',value:3}] },
+  { id:'q4',  dim:'P2', text:'你请了年假，老板会？',
+    options:[{label:'第二天打电话问你一个"紧急"问题',value:1},{label:'出发前叮嘱你带着电脑',value:2},{label:'祝你玩得开心',value:3}] },
+  { id:'q5',  dim:'P3', text:'你做了一个漂亮的方案，老板向上汇报时？',
+    options:[{label:'全程用"我们"，但"我们"里没有你',value:1},{label:'提到了你的名字',value:2},{label:'带着你一起去讲',value:3}] },
+  { id:'q6',  dim:'P3', text:'出了问题，老板的第一反应是？',
+    options:[{label:'直接说"你怎么搞的"',value:1},{label:'开会复盘，大家一起找原因',value:2},{label:'先问怎么解决',value:3}] },
+  { id:'q7',  dim:'C1', text:'你的工作有问题，老板会？',
+    options:[{label:'当着全组的面指出来',value:1},{label:'私下说，但语气很冲',value:2},{label:'私下说，说完还问你有没有其他困难',value:3}] },
+  { id:'q8',  dim:'C1', text:'你做得很好，老板会？',
+    options:[{label:'什么都不说，因为这是你应该做的',value:1},{label:'发个"不错"',value:2},{label:'当着大家的面夸你，还发了个小红包',value:3}] },
+  { id:'q9',  dim:'C2', text:'公司有重大变动，你是怎么知道的？',
+    options:[{label:'离职同事告诉你的',value:1},{label:'小道消息，后来老板确认了',value:2},{label:'老板开会直接告诉你',value:3}] },
+  { id:'q10', dim:'C2', text:'老板给你定的目标是？',
+    options:[{label:'玄学，你自己悟',value:1},{label:'大概说了个方向',value:2},{label:'清晰，有具体数字和时间节点',value:3}] },
+  { id:'q11', dim:'C3', text:'老板今天心情好不好，你能判断吗？',
+    options:[{label:'全组都在看他脸色，这是必备技能',value:1},{label:'有时候能感觉出来',value:2},{label:'判断不了，他一直很平稳',value:3}] },
+  { id:'q12', dim:'C3', text:'上周项目出了问题，这周老板对你的态度是？',
+    options:[{label:'你能感觉到他还在记仇',value:1},{label:'稍微有点冷淡',value:2},{label:'正常，事情过了就过了',value:3}] },
+  { id:'q13', dim:'D1', text:'你提了一个方案，老板什么时候给你答复？',
+    options:[{label:'进入"再议"黑洞，下落不明',value:1},{label:'想了两天回复你',value:2},{label:'当场拍板',value:3}] },
+  { id:'q14', dim:'D1', text:'遇到一个紧急决策，老板会？',
+    options:[{label:'说"你们先推进着，我再想想"',value:1},{label:'拉个群讨论，最后他拍板',value:2},{label:'5分钟内给出明确方向',value:3}] },
+  { id:'q15', dim:'D2', text:'你按老板要求做完了，他说？',
+    options:[{label:'"我觉得我们换个方向"',value:1},{label:'整体不错，这里改一下',value:2},{label:'好的，就这样',value:3}] },
+  { id:'q16', dim:'D2', text:'同一个问题，老板这个月给过几个不同答案？',
+    options:[{label:'三个以上，你已经麻木了',value:1},{label:'两个，可以理解',value:2},{label:'一个，他说话算数',value:3}] },
+  { id:'q17', dim:'D3', text:'有个新机会，可能大赚也可能踩坑，老板会？',
+    options:[{label:'不行，太危险，稳住',value:1},{label:'评估一下再决定',value:2},{label:'直接冲，先干再说',value:3}] },
+  { id:'q18', dim:'D3', text:'老板对"创新"的态度是？',
+    options:[{label:'别搞幺蛾子，做好本分就行',value:1},{label:'可以试，但要控制成本',value:2},{label:'鼓励大胆试，失败了没关系',value:3}] },
+  { id:'q19', dim:'B1', text:'老板说的"年底涨薪"，现在是几月了？',
+    options:[{label:'已经是第三年了',value:1},{label:'还在等，但有点希望',value:2},{label:'兑现了，他说话算数',value:3}] },
+  { id:'q20', dim:'B1', text:'老板描述的公司前景，你相信吗？',
+    options:[{label:'当相声听，挺好笑的',value:1},{label:'半信半疑',value:2},{label:'相信，有数据有逻辑',value:3}] },
+  { id:'q21', dim:'B2', text:'你提出涨薪，老板说？',
+    options:[{label:'"你觉得你现在的产出配吗"',value:1},{label:'"现在公司情况你也知道，等等看"',value:2},{label:'好，我来推动',value:3}] },
+  { id:'q22', dim:'B2', text:'老板夸你的频率是？',
+    options:[{label:'他认为夸人会让你飘',value:1},{label:'偶尔',value:2},{label:'经常，他很会正向激励',value:3}] },
+  { id:'q23', dim:'B3', text:'老板给团队开愿景会，内容是？',
+    options:[{label:'PPT很好看，但你听完不知道要干嘛',value:1},{label:'宏大的目标+模糊的路径',value:2},{label:'清晰的战略+可执行的路径',value:3}] },
+  { id:'q24', dim:'B3', text:'老板说"我们要做行业第一"，你的感受是？',
+    options:[{label:'他每年都这么说',value:1},{label:'听听就算了',value:2},{label:'有点激动，感觉可以',value:3}] },
+  { id:'q25', dim:'H1', text:'你状态不好，老板会？',
+    options:[{label:'说"大家都很辛苦，你要调整好状态"',value:1},{label:'没注意到，但你请假他批了',value:2},{label:'主动问你怎么了，给你减减压',value:3}] },
+  { id:'q26', dim:'H1', text:'组里有人生病请假，老板第一反应是？',
+    options:[{label:'先问工作，顺带问了一句身体',value:1},{label:'问一下工作怎么交接',value:2},{label:'关心对方身体',value:3}] },
+  { id:'q27', dim:'H2', text:'组里有没有明显的"老板亲信"？',
+    options:[{label:'有，而且大家都知道是谁',value:1},{label:'稍微有点，但不影响大局',value:2},{label:'没有，一碗水端平',value:3}] },
+  { id:'q28', dim:'H2', text:'绩效分配，你觉得公平吗？',
+    options:[{label:'不公平，但你不知道怎么反驳',value:1},{label:'说不清楚，但没太大意见',value:2},{label:'公平，有理有据',value:3}] },
+  { id:'q29', dim:'H3', text:'项目失败了，老板对外怎么说？',
+    options:[{label:'把问题归到某个具体执行人身上',value:1},{label:'客观分析了原因，没有明确甩锅',value:2},{label:'我们团队这次没做好，我来承担',value:3}] },
+  { id:'q30', dim:'H3', text:'向上汇报时出了问题，老板会？',
+    options:[{label:'直接说"是XX没做好"',value:1},{label:'说是各种客观原因',value:2},{label:'自己扛下来',value:3}] },
+];
+
+// ===== 状态 =====
+let current = 0;
+let answers = {}; // {qid: value}
+let shuffled = [...questions];
+
+// ===== 后端 API =====
+async function loadStats() {
+  try {
+    const res = await fetch('/api/stats');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.total > 0) {
+      document.getElementById('counter-num').textContent = data.total.toLocaleString();
+      document.getElementById('counter').style.display = 'block';
+    }
+  } catch (e) { /* 静默失败 */ }
+}
+
+async function submitResult(typeCode, typeCn, dimScores, answers) {
+  try {
+    await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type_code: typeCode, type_cn: typeCn, dim_scores: dimScores, answers })
+    });
+  } catch (e) { /* 静默失败 */ }
+}
+
+// 页面加载时获取统计
+loadStats();
+
+function startTest() {
+  // 随机打乱题目顺序
+  shuffled = [...questions].sort(() => Math.random() - 0.5);
+  current = 0;
+  answers = {};
+  showScreen('quiz');
+  renderQ();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function renderQ() {
+  const q = shuffled[current];
+  const total = shuffled.length;
+  const pct = Math.round((current / total) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${current} / ${total}`;
+
+  const sel = answers[q.id];
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').disabled = !sel;
+  document.getElementById('btn-next').textContent = current === total - 1 ? '查看结果 →' : '下一题 →';
+
+  document.getElementById('q-container').innerHTML = `
+    <div class="card q-card">
+      <div class="q-dim">${DIM_META[q.dim]?.name || q.dim} · ${DIM_META[q.dim]?.model || ''}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="options">
+        ${q.options.map(o => `
+          <button class="opt-btn ${sel === o.value ? 'selected' : ''}"
+            onclick="selectOpt('${q.id}', ${o.value})">
+            ${o.label}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function selectOpt(qid, val) {
+  answers[qid] = val;
+  document.getElementById('btn-next').disabled = false;
+  renderQ();
+}
+
+function nextQ() {
+  const q = shuffled[current];
+  if (!answers[q.id]) return;
+  if (current === shuffled.length - 1) {
+    calcResult();
+  } else {
+    current++;
+    renderQ();
+  }
+}
+
+function prevQ() {
+  if (current > 0) { current--; renderQ(); }
+}
+
+// ===== 计算结果 =====
+function calcResult() {
+  // 检查隐藏人格：连续5道选1
+  let consecutive1 = 0;
+  let maxConsecutive = 0;
+  for (const q of shuffled) {
+    if (answers[q.id] === 1) {
+      consecutive1++;
+      maxConsecutive = Math.max(maxConsecutive, consecutive1);
+    } else {
+      consecutive1 = 0;
+    }
+  }
+  if (maxConsecutive >= 5) {
+    showResult(HIDDEN_TYPE, null);
+    return;
+  }
+
+  // 计算每个维度得分
+  const dimScores = {}; // dim -> [val1, val2]
+  for (const q of questions) {
+    if (!dimScores[q.dim]) dimScores[q.dim] = [];
+    if (answers[q.id]) dimScores[q.dim].push(answers[q.id]);
+  }
+
+  const userPattern = {}; // dim -> 'L'|'M'|'H'
+  for (const dim of DIM_ORDER) {
+    const vals = dimScores[dim] || [2];
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const rounded = Math.round(avg);
+    userPattern[dim] = rounded <= 1 ? 'L' : rounded >= 3 ? 'H' : 'M';
+  }
+
+  // 匹配人格（汉明距离）
+  let best = null, bestDist = 999;
+  for (const t of NORMAL_TYPES) {
+    const patArr = t.pattern.replace(/-/g, '').split('');
+    let dist = 0;
+    DIM_ORDER.forEach((dim, i) => {
+      if (userPattern[dim] !== patArr[i]) dist++;
+    });
+    if (dist < bestDist) { bestDist = dist; best = t; }
+  }
+
+  showResult(TYPE_LIBRARY[best.code] || { code: best.code, cn: '?', intro: '?', desc: '?' }, userPattern);
+}
+
+function showResult(type, userPattern) {
+  // 上报结果到后端（静默）
+  submitResult(type.code, type.cn, userPattern, answers);
+  const isHidden = type.code === 'QUIT-MAKER';
+  const badgeHtml = isHidden
+    ? `<div class="hidden-badge">💀 隐藏人格解锁</div>`
+    : `<div class="result-badge">🔬 BBTI 老板人格鉴定结果</div>`;
+
+  let dimsHtml = '';
+  if (userPattern) {
+    dimsHtml = `
+      <div class="dims-title">📊 15维度画像</div>
+      <div class="dims-grid">
+        ${DIM_ORDER.map(dim => {
+          const score = userPattern[dim] || 'M';
+          const label = score === 'H' ? '高' : score === 'L' ? '低' : '中';
+          return `
+            <div class="dim-item">
+              <div class="dim-name">${DIM_META[dim]?.name || dim}</div>
+              <div class="dim-bar-bg"><div class="dim-bar ${score}"></div></div>
+              <div class="dim-score ${score}">${label}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  document.getElementById('result-content').innerHTML = `
+    ${badgeHtml}
+    <div class="result-code ${isHidden ? 'hidden-type' : ''}">${type.code}</div>
+    <div class="result-cn">${type.cn}</div>
+    <div class="result-intro">${type.intro}</div>
+    <div class="result-desc">${type.desc}</div>
+    ${dimsHtml}
+    <div class="result-actions">
+      <button class="btn-primary" onclick="startTest()">重新鉴定</button>
+      <button class="btn-secondary" onclick="showScreen('intro')">返回首页</button>
+    </div>
+  `;
+  showScreen('result');
+}
+</script>
+</body>
+</html>

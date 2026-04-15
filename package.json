@@ -1,0 +1,21 @@
+{
+  "name": "bbti-boss-test",
+  "version": "1.0.0",
+  "description": "BBTI 老板人格鉴定测评",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "cors": "^2.8.6",
+    "express": "^4.22.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "node-pre-gyp": "^0.17.0"
+  }
+}
