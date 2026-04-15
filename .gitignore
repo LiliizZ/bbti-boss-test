@@ -1,4 +1,4 @@
-node_modules/
+# node_modules 需要提交到 git 供 Railway 使用
 data/
 *.db
 .env
