@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BBTI 人格图鉴 · 20种老板人格</title>
+  <style>
+    :root {
+      --bg: #f5f4fa;
+      --panel: #ffffff;
+      --text: #1a1e2e;
+      --muted: #6b7084;
+      --line: #dde0ea;
+      --soft: #f0eef8;
+      --accent: #7c3aed;
+      --accent-strong: #6d28d9;
+      --radius: 20px;
+      --shadow: 0 8px 32px rgba(109,40,217,0.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top left, #ede9ff 0, #f5f4fa 40%, #fdf2f2 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .shell { max-width: 1100px; margin: 0 auto; padding: 32px 16px 64px; }
+
+    /* Hero */
+    .hero {
+      text-align: center; padding: 48px 24px 40px;
+      background: var(--panel); border-radius: var(--radius);
+      border: 1px solid var(--line); box-shadow: var(--shadow);
+      margin-bottom: 32px; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ""; position: absolute; top: -80px; right: -80px;
+      width: 260px; height: 260px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,58,237,0.12), transparent 70%);
+      pointer-events: none;
+    }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; color: var(--accent-strong);
+      border: 1px solid var(--line); background: var(--soft);
+      border-radius: 999px; padding: 6px 14px; margin-bottom: 16px;
+    }
+    .hero h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 900; letter-spacing: -.03em; margin: 0 0 12px; }
+    .hero p { color: var(--muted); font-size: 15px; margin: 0 0 24px; line-height: 1.7; }
+    .hero-stats { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
+    .stat-item { text-align: center; }
+    .stat-num { font-size: 28px; font-weight: 900; color: var(--accent-strong); }
+    .stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .btn-test {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent-strong); color: #fff;
+      padding: 12px 24px; border-radius: 14px; text-decoration: none;
+      font-weight: 700; font-size: 14px; margin-top: 20px;
+      box-shadow: 0 8px 24px rgba(109,40,217,0.25);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-test:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(109,40,217,0.3); }
+
+    /* Filter */
+    .filter-bar {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 24px; align-items: center;
+    }
+    .filter-btn {
+      padding: 7px 16px; border-radius: 999px; font-size: 13px; font-weight: 600;
+      border: 1.5px solid var(--line); background: var(--panel); color: var(--muted);
+      cursor: pointer; transition: all .15s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      border-color: var(--accent); background: var(--soft); color: var(--accent-strong);
+    }
+    .filter-btn.active { background: var(--accent-strong); color: #fff; border-color: var(--accent-strong); }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    /* Card */
+    .type-card {
+      background: var(--panel); border: 1.5px solid var(--line);
+      border-radius: var(--radius); padding: 0;
+      box-shadow: var(--shadow); cursor: pointer;
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+      overflow: hidden;
+    }
+    .type-card:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(109,40,217,0.13); border-color: var(--accent); }
+    .type-card.hidden-card { border-color: #dc2626; }
+    .type-card.hidden-card:hover { box-shadow: 0 16px 40px rgba(220,38,38,0.15); }
+
+    .card-header {
+      padding: 20px 20px 16px;
+      background: linear-gradient(135deg, var(--soft), #fff);
+      border-bottom: 1px solid var(--line);
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .type-card.hidden-card .card-header {
+      background: linear-gradient(135deg, #fff1f1, #fff);
+    }
+    .card-emoji { font-size: 32px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+    .card-title { flex: 1; }
+    .card-code {
+      font-size: 11px; font-weight: 800; letter-spacing: .1em;
+      color: var(--accent-strong); background: var(--soft);
+      padding: 3px 10px; border-radius: 999px; display: inline-block; margin-bottom: 6px;
+    }
+    .type-card.hidden-card .card-code { color: #dc2626; background: #fff1f1; }
+    .card-cn { font-size: 18px; font-weight: 800; margin: 0 0 4px; }
+    .card-intro { font-size: 13px; color: var(--muted); margin: 0; line-height: 1.5; }
+
+    .card-body { padding: 16px 20px 20px; }
+    .card-desc {
+      font-size: 13px; line-height: 1.75; color: #3d3d50;
+      display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+      overflow: hidden; margin-bottom: 14px;
+    }
+    .type-card.expanded .card-desc { -webkit-line-clamp: unset; overflow: visible; }
+
+    /* Pattern bars */
+    .pattern-wrap { margin-bottom: 12px; }
+    .pattern-label { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 8px; letter-spacing: .05em; }
+    .pattern-dims {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+    }
+    .dim-group { }
+    .dim-group-label { font-size: 9px; color: var(--muted); text-align: center; margin-bottom: 4px; }
+    .dim-bars { display: flex; gap: 3px; justify-content: center; }
+    .dim-dot {
+      width: 14px; height: 14px; border-radius: 4px; font-size: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; color: #fff;
+    }
+    .dim-dot.H { background: #059669; }
+    .dim-dot.M { background: #d97706; }
+    .dim-dot.L { background: #dc2626; }
+
+    .card-footer {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .expand-btn {
+      font-size: 12px; color: var(--accent-strong); font-weight: 600;
+      background: none; border: none; cursor: pointer; padding: 0;
+    }
+    .expand-btn:hover { text-decoration: underline; }
+    .hidden-badge {
+      font-size: 11px; font-weight: 700; color: #dc2626;
+      background: #fff1f1; border: 1px solid #fecaca;
+      padding: 3px 10px; border-radius: 999px;
+    }
+
+    /* Search */
+    .search-wrap { position: relative; margin-bottom: 20px; }
+    .search-input {
+      width: 100%; padding: 12px 16px 12px 40px;
+      border: 1.5px solid var(--line); border-radius: 14px;
+      font-size: 14px; background: var(--panel); color: var(--text);
+      outline: none; transition: border-color .15s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: 16px; pointer-events: none;
+    }
+    .no-result { text-align: center; padding: 48px; color: var(--muted); font-size: 15px; }
+
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+      .hero-stats { gap: 20px; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="eyebrow">🔬 BBTI 老板人格图鉴</div>
+    <h1>20种老板人格<br>你的老板是哪种？</h1>
+    <p>30道题 · 5大模型 · 15个维度 · 娱乐向，请勿当真</p>
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-num">20</div><div class="stat-label">人格类型</div></div>
+      <div class="stat-item"><div class="stat-num">1</div><div class="stat-label">隐藏人格</div></div>
+      <div class="stat-item"><div class="stat-num">30</div><div class="stat-label">测评题目</div></div>
+      <div class="stat-item"><div class="stat-num" id="total-count">-</div><div class="stat-label">已测评人数</div></div>
+    </div>
+    <a class="btn-test" href="/">开始鉴定老板 →</a>
+  </div>
+
+  <!-- Search + Filter -->
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="text" placeholder="搜索人格名称或关键词…" id="search-input" oninput="filterCards()">
+  </div>
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" onclick="setFilter('all', this)">全部 (20)</button>
+    <button class="filter-btn" onclick="setFilter('high-control', this)">高控制欲</button>
+    <button class="filter-btn" onclick="setFilter('low-boundary', this)">无边界感</button>
+    <button class="filter-btn" onclick="setFilter('high-pua', this)">高PUA</button>
+    <button class="filter-btn" onclick="setFilter('good', this)">还能处 ✅</button>
+    <button class="filter-btn" onclick="setFilter('hidden', this)">隐藏人格 💀</button>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid" id="card-grid"></div>
+  <div class="no-result" id="no-result" style="display:none">没有找到匹配的人格 🤔</div>
+</div>
+
+<script>
+const TYPES = [
+  {
+    code: 'GHOST', cn: '幽灵老板', emoji: '👻',
+    intro: '从不出现，但绩效考核很认真。',
+    pattern: 'LLL-LLM-MMM-LLL-LLM',
+    tags: ['low-boundary'],
+    desc: '恭喜您，您测出了职场界最神秘的存在——GHOST，幽灵老板。您的老板拥有一种令人叹为观止的量子态：他同时存在于公司的组织架构图上，又完全不存在于任何实际工作场景中。组会？他"临时有事"。1on1？上次是三个月前。但到了绩效季，他突然从虚空中凝聚成形，对你的每一个细节了如指掌，精准打出3.5分。你开始怀疑他在你工位装了摄像头。幽灵老板不是不管你，他只是用一种薛定谔的方式管理着你——在你需要支持的时候消失，在你以为自由的时候出现。和幽灵老板共事的最大技能点是：学会自我管理，以及学会自我安慰。'
+  },
+  {
+    code: 'MICRO', cn: '显微镜老板', emoji: '🔬',
+    intro: '连你的字体都要管。',
+    pattern: 'HHH-HMM-MMM-MMM-MMM',
+    tags: ['high-control'],
+    desc: '恭喜您，您测出了全中国最令人窒息的老板人格——MICRO，显微镜老板。您的老板拥有一种神奇的能力：在你写完一封邮件之前，他已经想好了要怎么改你的每一个字。他不是在管理，他是在用放大镜审视你生命中的每一个像素。PPT字体不统一？他能发现。Excel列宽差了2个像素？他能发现。你喝咖啡的姿势不够专业？他在想要不要发一条"规范"。MICRO老板的内心深处住着一个完美主义的小恶魔，这个恶魔相信：只要管得足够细，就能控制一切结果。现实是：他管得越细，你越不想动脑子。因为反正他会改的。'
+  },
+  {
+    code: 'PAINTER', cn: '画饼大师', emoji: '🎨',
+    intro: '期权在路上，一直在路上。',
+    pattern: 'MMM-MMH-LMH-HHH-LML',
+    tags: ['high-pua'],
+    desc: '恭喜您，您测出了职场界最伟大的艺术家——PAINTER，画饼大师。您的老板是一位天才画家，他的画布是你的未来，他的颜料是"年底涨薪""下轮期权""行业独角兽"。每一幅画都色彩斑斓，令人热血沸腾。唯一的问题是：这些画永远挂在墙上，从不落地。PAINTER老板有一套成熟的话术体系：当你问进展，他说"在推动了"；当你追结果，他说"大环境你懂的"；当你准备离职，他说"再等等，好事要来了"。三年后你终于明白，那个"好事"，是你自己离职找到的下家。'
+  },
+  {
+    code: 'VOLCANO', cn: '火山型老板', emoji: '🌋',
+    intro: '不知道什么时候爆发。',
+    pattern: 'HMM-HLH-LMM-MMM-LLM',
+    tags: ['high-control'],
+    desc: '恭喜您，您测出了职场界最危险的地质奇观——VOLCANO，火山型老板。和火山型老板共事，你需要一项核心技能：读空气。他今天进门时皱了一下眉？全组进入紧急避险状态。他发消息没有加句号？完了，有人要被点名了。VOLCANO老板平时可能表现得还不错，甚至有时候挺好相处——但那只是岩浆在地下积累的平静期。一旦触发某个神秘的临界点，他会以一种令所有人目瞪口呆的烈度喷发，把最近三个月的不满一次性清算。事后他可能若无其事，但你的心理阴影面积已经扩大了一个数量级。'
+  },
+  {
+    code: 'CLONE', cn: '复制机老板', emoji: '🤖',
+    intro: '要你变成他的翻版。',
+    pattern: 'HHM-HMM-MMM-HMM-MML',
+    tags: ['high-control', 'high-pua'],
+    desc: '恭喜您，您测出了职场界最执着的雕塑家——CLONE，复制机老板。CLONE老板有一个宏大的人生目标：把团队里的每一个人都塑造成他自己的复制品。他的思维方式是唯一正确的思维方式，他的工作方法是唯一有效的工作方法，他的审美是唯一的审美。你提出了一个不同的方案？"你这个思路不对，应该这样……"你用了不一样的框架？"我们一般用另一套。"久而久之，你开始怀疑自己的判断力，开始用他的口头禅，开始在会议上下意识地揣摩他会怎么想。恭喜你，你已经成功完成了第一阶段的克隆。'
+  },
+  {
+    code: 'BUDDY', cn: '哥们型老板', emoji: '🤝',
+    intro: '称兄道弟，绩效照打。',
+    pattern: 'LML-HMM-MMM-HML-HLL',
+    tags: ['high-pua'],
+    desc: '恭喜您，您测出了职场界最擅长情感套路的人格——BUDDY，哥们型老板。BUDDY老板是职场PUA的温柔版本。他跟你称兄道弟，请你吃饭，聊你的感情生活，说"咱们不是上下级，就是朋友"。你们的关系好到你以为绩效只是走个形式。然后绩效季来了，他给你打了3分，笑着说："兄弟，你懂的，公司规定，我也没办法。"你想反驳，但想起上周他还帮你出主意解决了个人问题，张不开口。这就是BUDDY老板的高明之处：用私人情感绑架职业判断，让你永远在"朋友"和"下属"的身份之间无所适从。'
+  },
+  {
+    code: 'GHOST-WRITER', cn: '抢功老板', emoji: '📋',
+    intro: '你的PPT，他的汇报。',
+    pattern: 'MMH-LLM-MMM-HHH-LLH',
+    tags: ['high-pua'],
+    desc: '恭喜您，您测出了职场界最高效的"二次创作者"——GHOST-WRITER，抢功老板。GHOST-WRITER老板拥有一项独门绝技：把你的劳动成果无缝转化为他的个人成就。你熬夜做的方案，他拿去向CEO汇报，全程用"我"；你提出的创意，在他嘴里变成了"我之前就在想"；你解决的技术难题，在他的月报里变成了"我们团队在我的带领下"。更绝的是，出了问题他绝对不在场，但摘果子的时候他永远第一个到。和GHOST-WRITER老板共事的唯一出路是：把你的贡献留下证据，不然你会在某天的全公司大会上，听到他用你的想法获得年度创新奖。'
+  },
+  {
+    code: 'ZEN', cn: '佛系老板', emoji: '🧘',
+    intro: '什么都行，什么都不管。',
+    pattern: 'LLL-LHL-HLL-LLL-MMM',
+    tags: ['low-boundary'],
+    desc: '恭喜您，您测出了职场界最超脱的存在——ZEN，佛系老板。ZEN老板已经达到了管理学的最高境界：无为而治。你问他方向，他说"你看着办"；你要资源，他说"你去协调"；你需要决策，他说"你们讨论一下"。他不是在放权，他是在放弃。ZEN老板的日常是：上午喝茶，下午开会（但不发言），傍晚准时下班。他对你的最大影响是：你需要完全靠自己。这听起来像是成长机会，但实际上是：你在用自己的判断力承担着本应由他承担的风险。如果成了，是你的本事；如果错了，是你的责任。'
+  },
+  {
+    code: 'EMPEROR', cn: '皇帝型老板', emoji: '👑',
+    intro: '朕说什么就是什么。',
+    pattern: 'HHH-HLH-HHH-HHH-LLL',
+    tags: ['high-control', 'low-boundary'],
+    desc: '恭喜您，您测出了职场界最具封建遗风的人格——EMPEROR，皇帝型老板。EMPEROR老板活在一个平行宇宙里，那个宇宙的基本物理法则是：他说的就是对的。你拿出数据反驳？"数据可以造假。"你引用行业案例？"别的公司跟我们不一样。"你提出不同意见？"你资历还不够，等你做到我这个位置再说。"在EMPEROR的朝廷里，会议的本质是一场宣读圣旨的仪式，而不是讨论。你的职责是执行，不是思考。久而久之，团队里最聪明的人开始沉默，因为他们发现：在这里，智慧是一种负担。'
+  },
+  {
+    code: 'MENTOR', cn: '真导师', emoji: '🌟',
+    intro: '稀有物种，珍惜。',
+    pattern: 'LMH-HHH-MHM-MHH-HHH',
+    tags: ['good'],
+    desc: '恭喜您，您测出了职场界最濒危的物种——MENTOR，真导师。MENTOR老板是一个统计学意义上的奇迹。他会在你犯错时私下告诉你哪里可以改进，而不是当众羞辱你；他会在汇报时带上你，让你有机会被看见；他说的"年底涨薪"，年底真的兑现了。和MENTOR老板共事，你会有一种奇怪的不适应感——因为你已经习惯了被管理，而不是被培养。请珍惜这段经历，把它写进简历，讲给面试官听，然后在下一家公司用MENTOR的标准衡量每一个新老板。你会发现，你已经被永久拉高了预期。'
+  },
+  {
+    code: 'PIVOT', cn: '变卦王', emoji: '🌀',
+    intro: '方向比风向标转得还快。',
+    pattern: 'MMM-MLM-LHM-HMH-MMM',
+    tags: [],
+    desc: '恭喜您，您测出了职场界最具动态美学的人格——PIVOT，变卦王。PIVOT老板相信一件事：计划永远赶不上变化，所以不如直接成为变化本身。你按照他上周的要求做完了方案，他说"我觉得方向不对，换一个"；你换了方向做完，他说"这个思路其实我之前想过，不太行"；你问他到底要什么，他说"你先做着，我们边做边看"。PIVOT老板不是故意折磨你，他只是有一种生理性的对确定性的恐惧。他的大脑永远在产生新想法，而这些想法的平均寿命是72小时。在他手下工作的最高境界是：只做60%，剩下40%等他变卦。'
+  },
+  {
+    code: 'SCAPEGOAT', cn: '甩锅侠', emoji: '🥊',
+    intro: '锅永远是你的，功永远是他的。',
+    pattern: 'HMH-LLM-HMM-LLH-LLH',
+    tags: ['high-pua'],
+    desc: '恭喜您，您测出了职场界最精通物理学的人格——SCAPEGOAT，甩锅侠。SCAPEGOAT老板深刻理解了牛顿第三定律在职场中的变体：每一个成功都有一个归属（他），每一个失败都有一个承担者（你）。项目失败了？"执行层面出了问题，我当时就说过要注意这个细节。"向上汇报翻车了？"是某某没做好准备，我已经提醒过他了。"你的成果被表扬了？"这是我们团队的努力，我一直在引导大家往这个方向走。"SCAPEGOAT老板的锅，有一种神奇的热传导性，永远从他身上传到你身上，而且传输过程中还会增温。'
+  },
+  {
+    code: 'STAT', cn: '数据控老板', emoji: '📊',
+    intro: '你的一切都是KPI。',
+    pattern: 'HHH-MHH-HMM-HHH-LMM',
+    tags: ['high-control'],
+    desc: '恭喜您，您测出了职场界最理性的存在——STAT，数据控老板。STAT老板生活在一个由数字构成的世界里。你的价值等于你的产出数据，你的成长等于你的指标曲线，你的努力等于你的打卡记录。他不是不关心你，他只是用一种Excel表格的方式关心你。1on1的时候，他会打开一个Dashboard，然后逐行分析你的"表现数据"。你说"我最近状态不太好"，他说"我看你的产出这周下降了12%，有什么原因？"。和STAT老板共事，你会学会一件事：把所有努力都量化，把所有价值都可视化。这是一种能力，但也是一种悲哀。'
+  },
+  {
+    code: 'INVISIBLE', cn: '隐形人老板', emoji: '🫥',
+    intro: '要资源没资源，要反馈没反馈。',
+    pattern: 'LLL-LLL-LLL-LLL-LLL',
+    tags: ['low-boundary'],
+    desc: '恭喜您，您测出了职场界最彻底的存在主义困境——INVISIBLE，隐形人老板。INVISIBLE老板不是幽灵，幽灵至少还会在绩效季显灵。INVISIBLE老板是真正意义上的不存在：你要资源，他说"现在不好申请"；你要方向，他说"你们自己判断"；你要反馈，他说"挺好的"然后结束了1on1。在INVISIBLE老板手下，你会经历一种特殊的职场孤独：你不知道自己做得好不好，不知道公司要往哪里走，不知道你的工作对谁有价值。你就像一艘没有导航、没有补给的船，在大海上自由漂流。这是自由，也是被遗弃。'
+  },
+  {
+    code: 'TOXIC', cn: '毒老板', emoji: '☠️',
+    intro: '以上全占，恭喜你。',
+    pattern: 'HHH-HHH-HHH-HHH-LLL',
+    tags: ['high-control', 'high-pua', 'low-boundary'],
+    desc: '恭喜您，您测出了职场界的终极BOSS——TOXIC，毒老板。TOXIC老板是一个令人叹为观止的综合体：他有MICRO的控制欲，VOLCANO的情绪，SCAPEGOAT的甩锅技术，PAINTER的画饼能力，以及GHOST-WRITER的抢功本能。这不是一个人，这是一个职场噩梦的完全体。和TOXIC老板共事，你会在短时间内获得以下技能：极强的抗压能力、完善的情绪管理、精准的危机预判，以及一份充满故事的简历。每一段痛苦都是成长，每一次委屈都是阅历。但说真的——你已经可以离职了。你值得更好的。'
+  },
+  {
+    code: 'ROBOT', cn: '机器人老板', emoji: '⚙️',
+    intro: '流程就是一切，人情不存在。',
+    pattern: 'HHH-MHM-HHH-MMM-LLL',
+    tags: ['high-control'],
+    desc: '恭喜您，您测出了职场界最高度自动化的人格——ROBOT，机器人老板。ROBOT老板是一台完美运转的管理机器：所有事情都有流程，所有流程都必须遵守，所有例外都不存在。你妈住院了想早退？"走审批流程，需要提前三天申请。"你有个紧急想法想快速推进？"先写立项报告，过委员会评审。"你想和他聊聊职业发展？"这个话题我们下次1on1再说，今天的议程已经排满了。"ROBOT老板不坏，他只是把人类的复杂性压缩成了一套SOP。在他的世界里，效率是最高价值，而效率的敌人是情感。所以他选择了没有情感。'
+  },
+  {
+    code: 'LEECH', cn: '吸血鬼老板', emoji: '🧛',
+    intro: '你加班，他晒娃。',
+    pattern: 'HHH-LLM-MMM-HHH-LLL',
+    tags: ['high-control', 'low-boundary'],
+    desc: '恭喜您，您测出了职场界最擅长能量转化的人格——LEECH，吸血鬼老板。LEECH老板掌握了一种神奇的职场炼金术：把你的时间、精力和健康，转化为他的绩效、晋升和家庭幸福。你在公司加班到凌晨，他在朋友圈晒孩子的钢琴演奏会；你周末在赶方案，他在微博更新徒步打卡；你的黑眼圈越来越深，他的气色越来越好。LEECH老板不会直接命令你加班，他只会在下班前五分钟发来一个"小需求"，然后说"不急，你看着安排"。你们都知道这句话的真实含义。'
+  },
+  {
+    code: 'GOSSIP', cn: '八卦老板', emoji: '🗣️',
+    intro: '什么都知道，什么都乱说。',
+    pattern: 'MMH-HLL-MMM-MLL-LMM',
+    tags: [],
+    desc: '恭喜您，您测出了职场界最强情报官——GOSSIP，八卦老板。GOSSIP老板是公司非正式信息网络的核心节点。他知道A和B之间有矛盾，知道C在悄悄面试，知道D上个季度的真实绩效，知道CEO昨天说了什么。这些信息他都知道，而且他会在合适的时机，以"我随便说说，你别外传"的方式，精准地传递给最多的人。更妙的是，他也会把你说的话传出去。你跟他抱怨了一句同事，三天后那个同事知道了；你透露了一点职业规划，一周后HR找你谈话了。在GOSSIP老板面前，沉默是金，因为你说的每一句话都可能成为呈堂证供。'
+  },
+  {
+    code: 'SAVIOR', cn: '救世主老板', emoji: '🦸',
+    intro: '以拯救你为己任，其实很烦。',
+    pattern: 'HHM-HHH-MMH-HMH-HLL',
+    tags: ['high-pua'],
+    desc: '恭喜您，您测出了职场界最令人窒息的好意——SAVIOR，救世主老板。SAVIOR老板真心实意地认为自己在帮你。他会主动帮你修改你认为已经很好的方案，因为"我有经验，我帮你优化一下"；他会替你做决定，因为"你还年轻，这种事交给我"；他会在你不需要的时候给你建议，因为"我当年就是这么走过来的"。SAVIOR老板的问题不是恶意，而是他的帮助从来不是你需要的帮助。他在拯救一个他想象中的你，而不是真实的你。长期被SAVIOR老板管理，你会逐渐失去独立判断的能力，因为他永远比你先到达答案。'
+  },
+  {
+    code: 'QUIT-MAKER', cn: '劝退大师', emoji: '💀',
+    intro: '你不是在评测老板，你在描述一场灾难。',
+    pattern: '隐藏触发',
+    tags: ['hidden'],
+    hidden: true,
+    desc: '恭喜您，您触发了职场界最黑暗的隐藏成就——QUIT-MAKER，劝退大师。能测出这个人格，说明你的老板已经超越了普通的"差"，进入了一种艺术级别的糟糕。QUIT-MAKER老板不需要主动赶走员工，他只需要做他自己，离职率就会自然而然地保持在行业领先水平。他的存在本身就是一道离职申请。如果你现在还在这家公司，说明你有着超乎寻常的忍耐力、强大的经济压力，或者你还没有意识到外面的世界有多好。这是一个善意的提醒：更新一下简历吧。你值得更好的。'
+  },
+];
+
+const DIM_ORDER = ['P1','P2','P3','C1','C2','C3','D1','D2','D3','B1','B2','B3','H1','H2','H3'];
+const GROUP_LABELS = ['权力', '沟通', '决策', '画饼', '人性'];
+
+let currentFilter = 'all';
+let expandedCards = new Set();
+
+function parsePattern(pattern) {
+  if (pattern === '隐藏触发') return null;
+  return pattern.replace(/-/g, '').split('');
+}
+
+function renderPatternDots(pattern) {
+  const vals = parsePattern(pattern);
+  if (!vals) return `<div style="font-size:12px;color:#dc2626;font-weight:700;padding:4px 0">🔒 隐藏触发条件</div>`;
+  const groups = [[0,1,2],[3,4,5],[6,7,8],[9,10,11],[12,13,14]];
+  return `<div class="pattern-dims">
+    ${groups.map((g, gi) => `
+      <div class="dim-group">
+        <div class="dim-group-label">${GROUP_LABELS[gi]}</div>
+        <div class="dim-bars">
+          ${g.map(i => `<div class="dim-dot ${vals[i]}" title="${DIM_ORDER[i]}">${vals[i]}</div>`).join('')}
+        </div>
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+function renderCard(t) {
+  const isExpanded = expandedCards.has(t.code);
+  const hiddenClass = t.hidden ? 'hidden-card' : '';
+  const expandedClass = isExpanded ? 'expanded' : '';
+  return `<div class="type-card ${hiddenClass} ${expandedClass}" id="card-${t.code}" data-tags="${t.tags.join(',')}" data-search="${t.code} ${t.cn} ${t.intro} ${t.desc}">
+    <div class="card-header">
+      <div class="card-emoji">${t.emoji}</div>
+      <div class="card-title">
+        <div class="card-code">${t.code}</div>
+        <div class="card-cn">${t.cn}</div>
+        <p class="card-intro">${t.intro}</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">${t.desc}</div>
+      <div class="pattern-wrap">
+        <div class="pattern-label">维度画像</div>
+        ${renderPatternDots(t.pattern)}
+      </div>
+      <div class="card-footer">
+        <button class="expand-btn" onclick="toggleExpand('${t.code}')">${isExpanded ? '收起 ↑' : '展开全文 ↓'}</button>
+        ${t.hidden ? '<span class="hidden-badge">💀 隐藏人格</span>' : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderGrid() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const grid = document.getElementById('card-grid');
+  const noResult = document.getElementById('no-result');
+
+  const filtered = TYPES.filter(t => {
+    const matchFilter = currentFilter === 'all' || t.tags.includes(currentFilter);
+    const matchSearch = !q || t.code.toLowerCase().includes(q) || t.cn.includes(q) || t.intro.includes(q) || t.desc.includes(q);
+    return matchFilter && matchSearch;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    noResult.style.display = 'block';
+  } else {
+    noResult.style.display = 'none';
+    grid.innerHTML = filtered.map(renderCard).join('');
+  }
+}
+
+function toggleExpand(code) {
+  if (expandedCards.has(code)) expandedCards.delete(code);
+  else expandedCards.add(code);
+  renderGrid();
+  // scroll to card
+  setTimeout(() => {
+    const el = document.getElementById('card-' + code);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 50);
+}
+
+function setFilter(tag, btn) {
+  currentFilter = tag;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+}
+
+function filterCards() { renderGrid(); }
+
+// 加载统计
+async function loadStats() {
+  try {
+    const res = await fetch('/api/stats');
+    const data = await res.json();
+    if (data.total > 0) {
+      document.getElementById('total-count').textContent = data.total.toLocaleString();
+    } else {
+      document.getElementById('total-count').textContent = '0';
+    }
+  } catch(e) {
+    document.getElementById('total-count').textContent = '-';
+  }
+}
+
+renderGrid();
+loadStats();
+</script>
+</body>
+</html>
